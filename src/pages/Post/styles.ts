@@ -66,6 +66,11 @@ export const LinkItemConteiner = styled.div`
         transition: ease-in-out 0.3s;
       }
 
+      & a {
+        text-decoration: none;
+        color: rgb(50, 148, 248);
+      }
+
 `
 
 export const PostHeaderTitle = styled.div`
@@ -117,7 +122,7 @@ export const TextMainContainer = styled.div`
         line-height: 160%;
     }
 
-    & h1{
+    & h1, h2{
         font-size:1rem;
         width: fit-content;
         border-bottom: 1px solid ${props => props.theme['--blue']};
@@ -125,16 +130,10 @@ export const TextMainContainer = styled.div`
         color: ${props => props.theme['--blue']};
     }
 
-
-`
-
-export const CodeContainer = styled.div`
-    width: 100%;
-    background-color: ${props => props.theme['--base-post']};
-    padding:1rem;
-    border-radius: 2px;
-
-    & p{
-        color: ${props => props.theme['--base-text']};
+    & ol li::marker {
+        color: white;
     }
+
+
 `
+

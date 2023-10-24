@@ -1,6 +1,6 @@
-
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import '../../fontawesome';
+
 
 import { 
     ArrowUpRightContainer,
@@ -23,8 +23,8 @@ import axios from 'axios';
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-const username = 'ALvaroOrlando'
-const repo = 'githubBlog'
+const username = 'AlvaroOrlando'
+const repo = 'DT-Money'
 
 interface dataProps {
   name:string
@@ -35,18 +35,24 @@ interface dataProps {
   avatar_url:string
 }
 
-interface issueProps {
-  node_id:string
+export interface issueProps {
+  title: string
+  body: string
+  html_url:string
+  comments:number
+  created_at: string
+  number:number
+  id:number
 }
 
 
 
 export function Home(){
-
+ 
 
   function handleSubmit(e:React.FormEvent<HTMLFormElement>){
     e.preventDefault()
-      fetchRepo(busca)
+      fetchIssue(busca)
   }
 
   function handleChange(e: React.FormEvent<HTMLInputElement>){
@@ -54,7 +60,7 @@ export function Home(){
   }
 
 
-  const [data, setData] = useState<dataProps>({
+  const [userData, setUserData] = useState<dataProps>({
     name:'',
     bio:'',
     login:'',
@@ -67,58 +73,64 @@ export function Home(){
   const [busca, setBusca] = useState('')
 
 
-  const fetchData = async ()=>{
-    const { data: response } = await axios.get(`http://api.github.com/users/${username}`)
-    setData(response)
-    // console.log(response);
-  }
-
-  // const followersData = async ()=>{
-  //   const { data: response } = await axios.get(`https://api.github.com/users/${username}/followers`)
-  //   console.log(response);
-  // }
-
-  // followersData()
-  
-  useEffect(()=>{
-    fetchData()
-  },[])
-
-  async function fetchRepo(busca:string){
+  async function fetchIssue(busca:string){
     const url = new URL(`https://api.github.com/search/issues?q=${busca}%20repo:${username}/${repo}`)
     const { data: response } = await axios.get(url.href)
     setIssues(response.items)
   }
 
+  
+  async function fetchAllIssues(){
+    const url = new URL(`http://api.github.com/repos/${username}/${repo}/issues`)
+    const { data: response } = await axios.get(url.href)
+    setIssues(response);
+  }
+
+
+  const fetchUserData = async () => {
+    const url = new URL(`http://api.github.com/users/${username}`)
+    const { data: response } = await axios.get(url.href)
+    setUserData(response);
+  };
+
+  
+
+  useEffect(() => {
+    fetchAllIssues();
+  }, []); 
+  
+  useEffect(() => {
+    fetchUserData();
+  },[]);
 
     return (
         <HomeContainer>
           <ProfileContainer>
             <AvatarContainer>
-                <img src={data.avatar_url} alt="" />
+                <img src={userData.avatar_url} alt="" />
             </AvatarContainer>
             
             <ProfileTextContainer>
               <ProfileHeader>
-                <h1>{data.name}</h1>
+                <h1>{userData.name}</h1>
                 <p>
-                    {data.bio}
+                    {userData.bio}
                 </p>
               </ProfileHeader>
               <ProfileFooter>
                 <ProfileItemContainer>
                   <FontAwesomeIcon icon={['fab', 'github']} width={18} color="#3A536B" />
-                  <span>{data.login}</span>
+                  <span>{userData.login}</span>
                 </ProfileItemContainer>
-                {data.company ? <ProfileItemContainer>
+                {userData.company ? <ProfileItemContainer>
                   <FontAwesomeIcon icon={['fas', 'building']} width={18} color="#3A536B" />
-                  <span>{data.company}</span>
+                  <span>{userData.company}</span>
                 </ProfileItemContainer> : null}
                 
                   
                 <ProfileItemContainer>
                   <FontAwesomeIcon icon={['fas', 'user-group']} width={18} color="#3A536B" />
-                  <span>{data.followers} seguidores</span>
+                  <span>{userData.followers} seguidores</span>
                 </ProfileItemContainer>
               </ProfileFooter>
             </ProfileTextContainer>
@@ -131,25 +143,38 @@ export function Home(){
             </Link>
            
           </ProfileContainer>
-            <SearchContainer>
-             <form style={{'width': '100%'}} onSubmit={handleSubmit}>
-                <SearchHeader>
-                  <p>Publicações</p>
-                  <span>6 publicações</span>
-                </SearchHeader>
-                <SearchInput
-                  type="text"
+
+          <SearchContainer>
+            <form style={{'width': '100%'}} onSubmit={handleSubmit}>
+              <SearchHeader>
+                <p>Publicações</p>
+                <span>{issues.length} publicações</span>
+              </SearchHeader>
+              <SearchInput
+                type="text"
                 placeholder='Buscar conteúdo' 
                 name="search"
-                  onChange={handleChange}
-                />
-              </form>
-            </SearchContainer>
+                onChange={handleChange}
+                value={busca}
+               
+              />
+            </form>
+          </SearchContainer>
 
           <CardsMainContainer>
             {issues.map(issue =>{
+              const uniqueKey = `issue_${issue.number}`;
               return (
-                <Card key={issue.node_id} />
+               
+                <Card 
+                  key={uniqueKey}
+                  title={issue.title}
+                  body={issue.body}
+                  html_url={issue.html_url}
+                  comments={issue.comments}
+                  created_at={issue.created_at}
+                  id={issue.number} 
+                />
               )
             })}
             

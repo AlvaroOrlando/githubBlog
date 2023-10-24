@@ -1,71 +1,111 @@
-import { LinkItemConteiner, LinksContainer, PostContainer, PostFooterContainer, PostHeaderContainer, PostHeaderItemContainer, PostHeaderTitle, PostMainContainer, TextMainContainer, CodeContainer } from "./styles";
+import { LinkItemConteiner, LinksContainer, PostContainer, PostFooterContainer, PostHeaderContainer, PostHeaderItemContainer, PostHeaderTitle, PostMainContainer, TextMainContainer } from "./styles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome"
 import '../../fontawesome';
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useFormattedDate } from "../../utilities/index"
+import Markdown from "react-markdown";
+
+
+
+const username = 'AlvaroOrlando'
+const repo = 'DT-Money'
+interface User {
+  login: string;
+}
+
+ interface issueProps {
+  user: User;
+  title: string
+  body: string
+  html_url:string 
+  comments:number
+  created_at: string
+  number:number
+  id:number
+}
 
 export function Post(){
+  
+
+  const [issue, setIssue] = useState<issueProps | null>(null);
+  const { id } = useParams();
+
+  useEffect(() => {
+    const fetchIssueById = async () => {
+      try {
+        const url = new URL(`http://api.github.com/repos/${username}/${repo}/issues/${id}`);
+        const { data } = await axios.get(url.href);
+        setIssue(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+  
+    fetchIssueById();
+  }, [id]);
+
+  useEffect(()=>{
+    console.log(issue);
+  })
+
+  const formattedDate = useFormattedDate(issue?.created_at);
+  const markdownText = issue?.body
+  
     return (
-      <PostContainer>
-        <PostHeaderContainer>
-          <LinksContainer>
-          
-            <Link style={{'textDecoration':'none'}} to='/'>
+      <>
+
+        {issue && 
+        
+        <PostContainer>
+          <PostHeaderContainer>
+            <LinksContainer>
+            
+              <Link style={{'textDecoration':'none'}} to='/'>
+                <LinkItemConteiner>
+                    <FontAwesomeIcon icon={['fas', 'chevron-left']} width={14} color="#3294F8" />
+                    <span>VOLTAR</span>
+                </LinkItemConteiner>
+              </Link>
               <LinkItemConteiner>
-                  <FontAwesomeIcon icon={['fas', 'chevron-left']} width={14} color="#3294F8" />
-                  <span>VOLTAR</span>
-              </LinkItemConteiner>
-            </Link>
-            <LinkItemConteiner>
-              <span>VER NO GITHUB</span>
+              <Link to={issue.html_url}>VER NO GITHUB</Link>
               <FontAwesomeIcon icon={['fas', 'arrow-up-right-from-square']} width={14} color="#3294F8" />
-            </LinkItemConteiner>
-          
-          </LinksContainer>
+              </LinkItemConteiner>
+            
+            </LinksContainer>
 
-          <PostHeaderTitle>
-            <h1>JavaScript data types and data structures</h1> 
-          </PostHeaderTitle>
+            <PostHeaderTitle>
+              <h1>{issue.title}</h1> 
+            </PostHeaderTitle>
 
-          <PostFooterContainer>
-            <PostHeaderItemContainer>
-              <FontAwesomeIcon icon={['fab', 'github']} width={18} color="#3A536B" />
-              <span>alvinho.orlando</span>
-            </PostHeaderItemContainer>
-            <PostHeaderItemContainer>
-              <FontAwesomeIcon icon={['fas', 'calendar-day']} width={18} color="#3A536B" />
-              <span>Há 1 dia</span>
-            </PostHeaderItemContainer>
-            <PostHeaderItemContainer>
-              <FontAwesomeIcon icon={['fas', 'comment']} width={18} color="#3A536B" />
-              <span>5 comentários</span>
-            </PostHeaderItemContainer>
-          </PostFooterContainer>
-         
-        </PostHeaderContainer>
-
-        <PostMainContainer>
-            <TextMainContainer>
-                <p>
-                  Programming languages all have built-in data structures, but these often differ from one language
-                  to another. This article attempts to list the built-in data structures available in JavaScript and
-                  what properties they have. These can be used to build other data structures. Wherever possible,
-                  comparisons with other languages are drawn.
-                </p>
+            <PostFooterContainer>
+              <PostHeaderItemContainer>
+                <FontAwesomeIcon icon={['fab', 'github']} width={18} color="#3A536B" />
                 
-                <h1>Dynamic typing</h1>
-                <p>
-                  JavaScript is a loosely typed and dynamic language. Variables in JavaScript are not directly
-                  associated with any particular value type, and any variable can be assigned (and re-assigned)
-                  values of all types:
-                </p>
-            </TextMainContainer>
-           <CodeContainer>
-            <p>let foo = 42;  &nbsp;&nbsp;&nbsp; //foo is now a number</p>
-            <p>foo = 'bar';&nbsp;&nbsp;&nbsp; //foo is now a string</p>
-            <p>foo = true; &nbsp;&nbsp;&nbsp; //foo is now a boolean</p>
-           </CodeContainer>
-        </PostMainContainer>
-      </PostContainer>
+                <span>{issue.user && issue.user.login}</span>
+              </PostHeaderItemContainer>
+              <PostHeaderItemContainer>
+                <FontAwesomeIcon icon={['fas', 'calendar-day']} width={18} color="#3A536B" />
+                <span>{formattedDate}</span>
+              </PostHeaderItemContainer>
+              <PostHeaderItemContainer>
+                <FontAwesomeIcon icon={['fas', 'comment']} width={18} color="#3A536B" />
+                <span>{issue.comments} {issue.comments === 1 ? 'comentário' : 'comentários'}</span>
+              </PostHeaderItemContainer>
+            </PostFooterContainer>
+          
+          </PostHeaderContainer>
+
+          <PostMainContainer>
+              <TextMainContainer>
+                <Markdown>{markdownText}</Markdown>
+              </TextMainContainer>
+            
+          </PostMainContainer>
+        </PostContainer>
+        }
+      </>
     )
 }
 

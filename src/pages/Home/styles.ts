@@ -169,4 +169,5 @@ export const CardsMainContainer = styled.section`
     display: flex;
     flex-wrap: wrap;
     gap: 2rem;
+    padding-bottom: 2rem;
 `

@@ -2,6 +2,10 @@ import styled from "styled-components";
 
 export const CardContainer = styled.div`
     position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
 
     width: 100%;
     max-width: 25em;
@@ -24,6 +28,7 @@ export const CardContainer = styled.div`
         line-height: 160%;
         color: ${props => props.theme['--base-text']};
         margin-top: 1.25rem;
+        margin-bottom: 1.25rem;
     }
     
     & span{
@@ -35,5 +40,18 @@ export const CardContainer = styled.div`
         font-weight: 400;
     }
 
+    & a{
+        color: rgb(175, 194, 212);
+        text-decoration: none;
+        text-align: justify;
+
+        &:hover {
+            opacity: 0.8;
+        }
+
+       
+    }
+
+   
 
 `
